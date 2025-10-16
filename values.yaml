@@ -1,0 +1,168 @@
+namespaces:
+  - name: mlops
+
+deploymentApps:
+  - name: mlops-broker
+    hasService: true
+    namespace: mlops
+    replicas: 1
+    image: draskovicsv/mlops:broker
+    usePorts: true
+    ports:
+      - containerPort: 5550
+        protocol: TCP
+        port: 5550
+        name: "port5550"
+      - containerPort: 5551
+        protocol: TCP
+        port: 5551
+        name: "port5551"
+      - containerPort: 5555
+        protocol: TCP
+        port: 5555
+        name: "port5555"
+      - containerPort: 5556
+        protocol: TCP
+        port: 5556
+        name: "port5556"
+      - containerPort: 5557
+        protocol: TCP
+        port: 5557
+        name: "port5557"
+      - containerPort: 5558
+        protocol: TCP
+        port: 5558
+        name: "port5558"
+      - containerPort: 5559
+        protocol: TCP
+        port: 5559
+        name: "port5559"
+
+  - name: mlops-controller
+    hasService: true
+    namespace: mlops
+    replicas: 1
+    image: draskovicsv/mlops:controller
+    usePorts: true
+    ports:
+      - containerPort: 5000
+        protocol: TCP
+        port: 5000
+        name: "port5000"
+    useEnvs: true
+    envs:
+      - name: MLOPS_BROKER_HOST
+        value: mlops-broker-service
+    useSecurityContext: true
+    privilegedSecurityContext: true
+
+  - name: mlops-metrics
+    hasService: true
+    namespace: mlops
+    replicas: 1
+    image: draskovicsv/mlops:metrics
+    usePorts: true
+    ports:
+      - containerPort: 3000
+        protocol: TCP
+        port: 80
+        name: "grafana"
+    envs:
+      - name: MLOPS_DATABASE_HOST
+        value: mlops-database-service
+      - name: MLOPS_BROKER_HOST
+        value: mlops-broker-service
+
+  - name: mlops-processor-cicflow47
+    hasService: false
+    kind: Deployment
+    namespace: mlops
+    replicas: 1
+    image: draskovicsv/mlops:processor-cicflow47
+    envs:
+      - name: MLOPS_DATABASE_HOST
+        value: mlops-database-service
+      - name: MLOPS_CONTROLLER_HOST
+        value: mlops-controller-service
+      - name: MLOPS_BROKER_HOST
+        value: mlops-broker-service
+
+  - name: mlops-processor-cicflow65
+    hasService: false
+    namespace: mlops
+    replicas: 1
+    image: draskovicsv/mlops:processor-cicflow65
+    envs:
+      - name: MLOPS_DATABASE_HOST
+        value: mlops-database-service
+      - name: MLOPS_CONTROLLER_HOST
+        value: mlops-controller-service
+      - name: MLOPS_BROKER_HOST
+        value: mlops-broker-service
+
+  - name: mlops-processor-cicflow77
+    hasService: false
+    namespace: mlops
+    replicas: 1
+    image: draskovicsv/mlops:processor-cicflow77
+    envs:
+      - name: MLOPS_DATABASE_HOST
+        value: mlops-database-service
+      - name: MLOPS_CONTROLLER_HOST
+        value: mlops-controller-service
+      - name: MLOPS_BROKER_HOST
+        value: mlops-broker-service
+
+  - name: mlops-sniffer
+    hasService: true
+    namespace: mlops
+    replicas: 1
+    image: draskovicsv/mlops:sniffer
+    useSecurityContext: true
+    privilegedSecurityContext: true
+    usePorts: false
+    ports:
+      - containerPort: 5555
+        protocol: TCP
+        port: 5555
+        name: "port5555"
+    envs:
+      - name: MLOPS_SNIFFER_INTERFACE
+        value: lo
+      - name: MLOPS_BROKER_HOST
+        value: mlops-broker-service
+    hostNetwork: true
+
+statefulSetApps:
+  - name: mlops-database
+    hasService: true
+    namespace: mlops
+    replicas: 1
+    image: mongo:latest
+    serviceName: "mlops-database"
+    usePorts: true
+    ports:
+      - containerPort: 27017
+        protocol: TCP
+        port: 27017
+        name: "mongodb"
+    useVolumeMounts: true
+    volumeMounts:
+      - name: database-data
+        mountPath: /data/db/
+    useVolumes: true
+    volumes:
+      - name: database-data
+        path: /var/database-data/
+
+ingress:
+  name: mlops-ingress
+  namespace: mlops
+  rewriteTargetAnnotation: /
+  ingressClassName: nginx
+  host: mlops
+  paths:
+    - path: /
+      pathType: Prefix
+      targetServiceName: mlops-metrics-service
+      targetServicePort: 80

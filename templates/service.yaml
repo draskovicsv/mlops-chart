@@ -1,0 +1,41 @@
+{{ range .Values.deploymentApps }}
+---
+{{ if .hasService }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .name }}-service
+  namespace: {{ .namespace }}
+spec:
+  selector:
+    app: {{ .name }}
+  ports:
+    {{ range .ports }}
+    - port: {{ .port }}
+      protocol: {{ .protocol }}
+      targetPort: {{ .containerPort }}
+      name: {{ .name }}
+    {{ end }}
+{{ end }}
+{{ end }}
+
+{{ range .Values.statefulSetApps }}
+---
+{{ if .hasService }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .name }}-service
+  namespace: {{ .namespace }}
+spec:
+  selector:
+    app: {{ .name }}
+  ports:
+    {{ range .ports }}
+    - port: {{ .port }}
+      protocol: {{ .protocol }}
+      targetPort: {{ .containerPort }}
+      name: {{ .name }}
+    {{ end }}
+{{ end }}
+{{ end }}

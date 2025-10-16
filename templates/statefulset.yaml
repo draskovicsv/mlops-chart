@@ -1,0 +1,45 @@
+{{ range .Values.statefulSetApps }}
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .name }}
+  namespace: {{ .namespace }}
+spec:
+  serviceName: {{ .serviceName }}
+  replicas: {{ .replicas }}
+  selector:
+    matchLabels:
+      app: {{ .name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .name }}
+    spec:
+      containers:
+        - name: {{ .name }}
+          image: {{ .image }}
+          imagePullPolicy: Always
+          {{ if .usePorts }}
+          ports:
+            {{ range .ports }}
+            - containerPort: {{ .containerPort }}
+              protocol: {{ .protocol }}
+            {{ end }}
+          {{ end }}
+          {{ if .useVolumeMounts }}
+          volumeMounts:
+            {{ range .volumeMounts }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+            {{ end }}
+          {{ end }}
+      {{ if .useVolumes }}
+      volumes:
+        {{ range .volumes }}
+        - name: {{ .name }}
+          hostPath:
+            path: {{ .path }}
+        {{ end }}
+      {{ end }}
+{{ end }}  

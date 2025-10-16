@@ -1,0 +1,43 @@
+{{ range .Values.deploymentApps }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .name }}-deployment
+  namespace: {{ .namespace }}
+spec:
+  replicas: {{ .replicas }}
+  selector:
+    matchLabels:
+      app: {{ .name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .name }}
+    spec:
+      containers:
+        - name: {{ .name }}
+          image: {{ .image }}
+          imagePullPolicy: Always
+          {{ if .usePorts }}
+          ports:
+            {{ range .ports }}
+            - containerPort: {{ .containerPort }}
+              protocol: {{ .protocol }}
+            {{ end }}
+          {{ end }}
+          {{ if .envs }}
+          env:
+            {{ range .envs }}
+            - name: {{ .name }}
+              value: {{ .value }}
+            {{ end }}
+          {{ end }}
+          {{ if .useSecurityContext }}
+          securityContext:
+            privileged: {{ .privilegedSecurityContext }}
+          {{ end }}
+      {{ if .hostNetwork }}
+      hostNetwork: true
+      {{ end }}
+{{ end }}
