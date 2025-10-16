@@ -2,6 +2,26 @@ namespaces:
   - name: mlops
 
 deploymentApps:
+  - name: mlops-sniffer
+    hasService: true
+    namespace: mlops
+    replicas: 1
+    image: draskovicsv/mlops:sniffer
+    useSecurityContext: true
+    privilegedSecurityContext: true
+    usePorts: false
+    ports:
+      - containerPort: 5555
+        protocol: TCP
+        port: 5555
+        name: "port5555"
+    envs:
+      - name: MLOPS_SNIFFER_INTERFACE
+        value: lo
+      - name: MLOPS_BROKER_HOST
+        value: mlops-broker-service
+    hostNetwork: true
+
   - name: mlops-broker
     hasService: true
     namespace: mlops
@@ -112,26 +132,6 @@ deploymentApps:
         value: mlops-controller-service
       - name: MLOPS_BROKER_HOST
         value: mlops-broker-service
-
-  - name: mlops-sniffer
-    hasService: true
-    namespace: mlops
-    replicas: 1
-    image: draskovicsv/mlops:sniffer
-    useSecurityContext: true
-    privilegedSecurityContext: true
-    usePorts: false
-    ports:
-      - containerPort: 5555
-        protocol: TCP
-        port: 5555
-        name: "port5555"
-    envs:
-      - name: MLOPS_SNIFFER_INTERFACE
-        value: lo
-      - name: MLOPS_BROKER_HOST
-        value: mlops-broker-service
-    hostNetwork: true
 
 statefulSetApps:
   - name: mlops-database
