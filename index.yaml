@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  mlops-chart:
+  - apiVersion: v2
+    appVersion: 1.16.0
+    created: "2025-10-16T13:36:31.237924596+02:00"
+    description: Chart for Vukadin Draskovic's master paper
+    digest: 9f18a5887242323fb4b81dbc1632a6686398333c37c446169d57c8d6f1853303
+    name: mlops-chart
+    type: application
+    urls:
+    - https://draskovicsv.github.io/mlops-chart/mlops-chart-0.1.0.tgz
+    version: 0.1.0
+generated: "2025-10-16T13:36:31.236080834+02:00"
